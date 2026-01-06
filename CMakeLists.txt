@@ -11,6 +11,22 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+##################build YDLIDAR SDK###################################
+include(ExternalProject)
+ExternalProject_Add(ydlidar-sdk
+  GIT_REPOSITORY https://github.com/YDLIDAR/YDLidar-SDK
+  UPDATE_DISCONNECTED TRUE
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/ydlidar-sdk-install
+)
+SET(YDLIDAR_SDK_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/ydlidar-sdk-install/include)
+SET(YDLIDAR_SDK_LIB_DIRS ${CMAKE_CURRENT_BINARY_DIR}/ydlidar-sdk-install/lib)
+
+include_directories(
+  include
+  ${YDLIDAR_SDK_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_BINARY_DIR}/ydlidar-sdk-prefix/src/ydlidar-sdk
+)
+
 ####################find package#####################################
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -19,11 +35,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
-
-############## YDLIDAR SDK START#####################################
-#find ydlidar_sdk package
-find_package(ydlidar_sdk REQUIRED)
-############## YDLIDAR SDK END#####################################
 
 #Include directories
 include_directories(
@@ -42,6 +53,7 @@ add_executable(${PROJECT_NAME}_node
 #---------------------------------------------------------------------------------------
 # link libraries
 #--------------------------------------------------------------------------------------
+add_dependencies(${PROJECT_NAME}_node ydlidar-sdk)
 ament_target_dependencies(${PROJECT_NAME}_node
     "rclcpp"
     "sensor_msgs"
@@ -51,7 +63,8 @@ ament_target_dependencies(${PROJECT_NAME}_node
     )
 
 target_link_libraries(${PROJECT_NAME}_node
-    ${YDLIDAR_SDK_LIBRARIES})
+    ${YDLIDAR_SDK_LIB_DIRS}/libydlidar_sdk.a
+)
 
 #---------------------------------------------------------------------------------------
 # generate excutable and add libraries
@@ -85,4 +98,3 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
-
