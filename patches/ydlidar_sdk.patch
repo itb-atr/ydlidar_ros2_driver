@@ -1,0 +1,78 @@
+diff --git ydlidar-sdk/CMakeLists.txt ydlidar-sdk_fixed/CMakeLists.txt
+index 28a111a..efe1756 100755
+--- ydlidar-sdk/CMakeLists.txt
++++ ydlidar-sdk_fixed/CMakeLists.txt
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.20)
+ project(ydlidar_sdk C CXX)
+ 
+ #########################################################
+@@ -43,41 +43,25 @@ ENDIF (CMAKE_SYSTEM_NAME MATCHES "Linux")
+ # add cmake module path
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+ set(SDK_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
++set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
+ #############################################################################
+ # include cmake file
+ include(common/ydlidar_base)
+ include(install_package)
+ 
+-#############################################################################
+-# Policy CMP0023 allows to mix old and new interfaces of target_link_libraries
+-if(COMMAND cmake_policy)
+-	cmake_policy(SET CMP0003 NEW) # We don't want to mix relative and absolute paths in linker lib lists.
+-	cmake_policy(SET CMP0005 NEW) # Escape definitions (-D) strings
+-	if(POLICY CMP0053)
+-		cmake_policy(SET CMP0053 OLD) # Simplify variable reference and escape sequence evaluation.
+-	endif()
+-	if(POLICY CMP0037)
+-		cmake_policy(SET CMP0037 OLD)  # Allow defining target "test"
+-	endif()
+-	if(POLICY CMP0043)
+-		cmake_policy(SET CMP0043 OLD) #  Ignore COMPILE_DEFINITIONS_<Config> properties.
+-	endif()
+-endif()
+-
+ #############################################################################
+ # option
+ option( BUILD_SHARED_LIBS "Build shared libraries." OFF)
+-option( BUILD_EXAMPLES "Build Example." ON)
++option( BUILD_EXAMPLES "Build Example." OFF)
+ option( BUILD_CSHARP "Build CSharp." OFF)
+ option( BUILD_TEST "Build Test." OFF)
+ 
+ ############################################################################
+ # find package
+-find_package(SWIG)
+-find_package(PythonInterp)
+-find_package(PythonLibs)
+-find_package(GTest)
++# find_package(SWIG)
++# find_package(PythonInterp)
++# find_package(PythonLibs)
++# find_package(GTest)
+ 
+ ############################################################################
+ # include headers
+diff --git ydlidar-sdk/core/CMakeLists.txt ydlidar-sdk_fixed/core/CMakeLists.txt
+index e37b425..38ce54f 100644
+--- ydlidar-sdk/core/CMakeLists.txt
++++ ydlidar-sdk_fixed/core/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.20)
+ include_directories(.)
+ include_directories( ${CMAKE_CURRENT_SOURCE_DIR})
+ subdirlist(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
+diff --git ydlidar-sdk/examples/CMakeLists.txt ydlidar-sdk_fixed/examples/CMakeLists.txt
+index e9469a9..1aaa799 100644
+--- ydlidar-sdk/examples/CMakeLists.txt
++++ ydlidar-sdk_fixed/examples/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ 
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.20)
+ PROJECT(ydlidar_test)
+ add_compile_options(-std=c++11) # Use C++11
+ 
