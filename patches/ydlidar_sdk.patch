@@ -2,6 +2,7 @@ diff --git ydlidar-sdk/CMakeLists.txt ydlidar-sdk_fixed/CMakeLists.txt
 index 28a111a..efe1756 100755
 --- ydlidar-sdk/CMakeLists.txt
 +++ ydlidar-sdk_fixed/CMakeLists.txt
+@@ -1,4 +1,4 @@
 -cmake_minimum_required(VERSION 2.8)
 +cmake_minimum_required(VERSION 3.20)
  project(ydlidar_sdk C CXX)
