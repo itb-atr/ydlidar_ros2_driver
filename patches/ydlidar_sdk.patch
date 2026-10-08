@@ -1,25 +1,18 @@
-diff --git ydlidar-sdk/CMakeLists.txt ydlidar-sdk_fixed/CMakeLists.txt
-index 28a111a..efe1756 100755
+YDLIDAR SDK: CMake 3.20+ / CMake 4 compatibility.
+Complete replacement for patches/ydlidar_sdk.patch, not an incremental patch.
+Apply to clean SDK sources using patch -p0 from the SDK parent directory.
+Hunks deliberately omit unrelated whitespace-only context.
+
+diff --git ydlidar-sdk/CMakeLists.txt ydlidar-sdk/CMakeLists.txt
 --- ydlidar-sdk/CMakeLists.txt
-+++ ydlidar-sdk_fixed/CMakeLists.txt
-@@ -1,4 +1,4 @@
++++ ydlidar-sdk/CMakeLists.txt
+@@ -1,1 +1,1 @@
 -cmake_minimum_required(VERSION 2.8)
 +cmake_minimum_required(VERSION 3.20)
- project(ydlidar_sdk C CXX)
- 
- #########################################################
-@@ -43,41 +43,25 @@ ENDIF (CMAKE_SYSTEM_NAME MATCHES "Linux")
- # add cmake module path
- list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
- set(SDK_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+@@ -43,1 +43,1 @@
 -set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 +set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
- #############################################################################
- # include cmake file
- include(common/ydlidar_base)
- include(install_package)
- 
--#############################################################################
+@@ -49,14 +48,0 @@
 -# Policy CMP0023 allows to mix old and new interfaces of target_link_libraries
 -if(COMMAND cmake_policy)
 -	cmake_policy(SET CMP0003 NEW) # We don't want to mix relative and absolute paths in linker lib lists.
@@ -34,46 +27,101 @@ index 28a111a..efe1756 100755
 -		cmake_policy(SET CMP0043 OLD) #  Ignore COMPILE_DEFINITIONS_<Config> properties.
 -	endif()
 -endif()
--
- #############################################################################
- # option
- option( BUILD_SHARED_LIBS "Build shared libraries." OFF)
+@@ -66,1 +52,1 @@
 -option( BUILD_EXAMPLES "Build Example." ON)
 +option( BUILD_EXAMPLES "Build Example." OFF)
- option( BUILD_CSHARP "Build CSharp." OFF)
- option( BUILD_TEST "Build Test." OFF)
- 
- ############################################################################
- # find package
+@@ -72,1 +58,1 @@
 -find_package(SWIG)
--find_package(PythonInterp)
--find_package(PythonLibs)
--find_package(GTest)
 +# find_package(SWIG)
+@@ -73,1 +59,1 @@
+-find_package(PythonInterp)
 +# find_package(PythonInterp)
+@@ -74,1 +60,1 @@
+-find_package(PythonLibs)
 +# find_package(PythonLibs)
+@@ -75,1 +61,1 @@
+-find_package(GTest)
 +# find_package(GTest)
- 
- ############################################################################
- # include headers
-diff --git ydlidar-sdk/core/CMakeLists.txt ydlidar-sdk_fixed/core/CMakeLists.txt
-index e37b425..38ce54f 100644
+@@ -114,1 +100,8 @@
+-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
++target_include_directories(${PROJECT_NAME} PUBLIC
++    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
++    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
++    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/core>"
++    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
++    "$<INSTALL_INTERFACE:include>"
++    "$<INSTALL_INTERFACE:include/src>"
++    "$<INSTALL_INTERFACE:include/core>")
+@@ -130,1 +123,1 @@
+-if(${SWIG_FOUND} AND ${PYTHONLIBS_FOUND})
++if(SWIG_FOUND AND PYTHONLIBS_FOUND)
+diff --git ydlidar-sdk/core/CMakeLists.txt ydlidar-sdk/core/CMakeLists.txt
 --- ydlidar-sdk/core/CMakeLists.txt
-+++ ydlidar-sdk_fixed/core/CMakeLists.txt
-@@ -1,4 +1,4 @@
++++ ydlidar-sdk/core/CMakeLists.txt
+@@ -1,1 +1,1 @@
 -cmake_minimum_required(VERSION 2.8)
 +cmake_minimum_required(VERSION 3.20)
- include_directories(.)
- include_directories( ${CMAKE_CURRENT_SOURCE_DIR})
- subdirlist(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
-diff --git ydlidar-sdk/examples/CMakeLists.txt ydlidar-sdk_fixed/examples/CMakeLists.txt
-index e9469a9..1aaa799 100644
+diff --git ydlidar-sdk/examples/CMakeLists.txt ydlidar-sdk/examples/CMakeLists.txt
 --- ydlidar-sdk/examples/CMakeLists.txt
-+++ ydlidar-sdk_fixed/examples/CMakeLists.txt
-@@ -1,5 +1,5 @@
- 
++++ ydlidar-sdk/examples/CMakeLists.txt
+@@ -2,1 +2,1 @@
 -cmake_minimum_required(VERSION 2.8)
 +cmake_minimum_required(VERSION 3.20)
- PROJECT(ydlidar_test)
- add_compile_options(-std=c++11) # Use C++11
- 
+diff --git ydlidar-sdk/cmake/install_package.cmake ydlidar-sdk/cmake/install_package.cmake
+--- ydlidar-sdk/cmake/install_package.cmake
++++ ydlidar-sdk/cmake/install_package.cmake
+@@ -92,4 +91,0 @@
+-            if(POLICY CMP0026)
+-              cmake_policy( SET CMP0026 OLD )
+-            endif()
+-            get_target_property( _target_library ${PACKAGE_LIB_NAME} LOCATION )
+@@ -96,1 +91,0 @@
+-            get_filename_component( _lib ${_target_library} NAME )
+@@ -139,1 +134,8 @@
+-            install( FILES ${_target_library} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
++            install(TARGETS ${PACKAGE_LIB_NAME}
++                EXPORT ${PROJECT_NAME}Targets
++                ARCHIVE DESTINATION lib
++                LIBRARY DESTINATION lib
++                RUNTIME DESTINATION bin)
++            install(EXPORT ${PROJECT_NAME}Targets
++                FILE ${PROJECT_NAME}Targets.cmake
++                DESTINATION lib/cmake/${PROJECT_NAME})
+@@ -155,1 +157,1 @@
+-        export( TARGETS ${LIBRARY_NAME}
++        export( TARGETS ${PACKAGE_LIB_NAME}
+@@ -177,1 +178,0 @@
+-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
+@@ -196,4 +196,0 @@
+-            if(POLICY CMP0026)
+-              cmake_policy( SET CMP0026 OLD )
+-            endif()
+-            get_target_property( _target_library ${PACKAGE_LIB_NAME} LOCATION )
+@@ -200,1 +197,1 @@
+-            list( INSERT PACKAGE_LINK_LIBS 0 ${_target_library} )
++            list( INSERT PACKAGE_LINK_LIBS 0 ${PACKAGE_LIB_NAME} )
+@@ -230,1 +227,1 @@
+-  export( TARGETS ${LIBRARY_NAME}
++  export( TARGETS ${PACKAGE_LIB_NAME}
+diff --git ydlidar-sdk/cmake/PackageConfig.cmake.in ydlidar-sdk/cmake/PackageConfig.cmake.in
+--- ydlidar-sdk/cmake/PackageConfig.cmake.in
++++ ydlidar-sdk/cmake/PackageConfig.cmake.in
+@@ -10,1 +10,1 @@
+-# This file, when used for INSTALLED code, does not use Targets... sigh.
++# Import the matching build-tree or install-tree targets.
+@@ -12,1 +12,1 @@
+-#if(NOT TARGET "@PACKAGE_PKG_NAME@_LIBRARIES" AND NOT "@PACKAGE_PKG_NAME@_BINARY_DIR")
++if(NOT TARGET "@PACKAGE_LIB_NAME@")
+@@ -13,1 +13,1 @@
+-#    include( "${PACKAGE_CMAKE_DIR}/@PACKAGE_PKG_NAME@Targets.cmake" )
++    include("${PACKAGE_CMAKE_DIR}/@PROJECT_NAME@Targets.cmake")
+@@ -14,1 +13,0 @@
+-#    include( "${PACKAGE_CMAKE_DIR}/@PACKAGE_PKG_NAME@ConfigVersion.cmake" )
+@@ -15,1 +14,6 @@
+-#endif()
++endif()
++get_target_property(_@PACKAGE_PKG_NAME@_INCLUDE_DIRS
++    @PACKAGE_LIB_NAME@ INTERFACE_INCLUDE_DIRECTORIES)
++set(@PACKAGE_PKG_NAME@_INCLUDE_DIRS "${_@PACKAGE_PKG_NAME@_INCLUDE_DIRS}"
++    CACHE INTERNAL "@PACKAGE_PKG_NAME@ include directories" FORCE)
++unset(_@PACKAGE_PKG_NAME@_INCLUDE_DIRS)
